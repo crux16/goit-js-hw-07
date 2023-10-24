@@ -1,75 +1,50 @@
 import { galleryItems } from './gallery-items.js';
 // Change code below this line
-import * as basicLightbox from 'basiclightbox';
+
+const galleryContainer = document.querySelector('ul.gallery');
 
 
-
-
-console.log(galleryItems);
-
-const galleries = document.querySelector('.gallery');
-const modal = document.querySelector('head');
-
-
-galleries.insertAdjacentHTML('afterbegin', createGalleryItem(galleryItems));
-
-/* function createItems(items){
-
-    items.forEach((item) => {
-
-        const image = document.createElement('img');
-        const link = document.createElement('a');
-        const list = document.createElement('li');
-
-        image.classList.add('gallery__image');
-        link.classList.add('gallery__item');
-        link.classList.add('gallery__link');
-
-        image.src = item.preview;
-
-        image.alt = item.description;
-
-        link.append(image);
-        list.append(link);
-        galleries.append(list);
-
-    });
-};
-
-createItems(galleryItems); */
-
-function createGalleryItem(element) {
+const createGalleryItem = (element) => {
     return element
-        .map(({ preview, original, description }) => {
-            return `
+    .map(({ preview, original, description}) => {
+        return `
         <li class="gallery__item">
-            <a class="gallery__link" href="${original}">
-                <img
-                class="gallery__image"
-                src="${preview}"
-                data-source="${original}"
-                alt="${description}"
-                />
-            </a>
-        </li>`
-        })
-        .join('');
-};
+        <a class="gallery__link" href="l${original}">
+          <img
+            class="gallery__image"
+            src="${preview}"
+            data-source="${original}"
+            alt="${description}"
+          />
+        </a>
+      </li>`;
+    })
+    .join('');
+}
 
-const zoomImage = (event) => {
-        event.target.reset;
+const photosMarkup = createGalleryItem(galleryItems);
 
-        const instance = basicLightbox.create(`
-            <div class="modal">
-                <p>
-                    Your first lightbox with just a few lines of code.
-                    Yes, it's really that simple.
-                </p>
-            </div>
-        `)
-        
-        instance.show()
-};
+const galleryHandler = (event) => {
+    event.preventDefault();
 
-galleries.addEventListener('click', zoomImage);
+    if (event.target.nodeName !== 'IMG') {
+        return;
+    }
 
+    const originalURL = event.target.dataset.source;
+    const newAltText = event.target.alt;
+    const showIMG = basicLightbox.create(`<img src="${originalURL}" alt="${newAltText}" />`);
+    showIMG.show();
+
+    window.addEventListener('keydown', onEscKeyPress);
+
+    function onEscKeyPress(event) {
+        const ESC_KEY_CODE = 'Escape';
+        if (event.code === ESC_KEY_CODE) {
+            showIMG.close();
+        }
+    }
+};  
+
+galleryContainer.insertAdjacentHTML('beforeend', photosMarkup);
+galleryContainer.addEventListener('click', galleryHandler);
